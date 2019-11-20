@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="author" content="ZXing for JS" />
 
-        <title>ZXing Test Page</title>
+        <title>ZXing TypeScript | Decoding from camera stream</title>
 
         <link
             rel="preload"
@@ -30,21 +30,18 @@
     <body>
         <main class="wrapper" style="padding-top:2em">
             <section class="container" id="demo-content">
-                <h1 class="title">Scan Barcode / QR code</h1>
+                <h1 class="title">Scan 1D/2D Code from Video Camera</h1>
 
-                <p>
-                    <a
-                        class="button-small button-outline"
-                        href="../../index.html"
-                        >ZXing Test Page - (주)3TOP</a
-                    >
-                </p>
+                <div>
+                    <a class="button" id="startButton">Start</a>
+                    <a class="button" id="resetButton">Reset</a>
+                </div>
 
                 <div>
                     <video
                         id="video"
-                        width="600"
-                        height="500"
+                        width="400"
+                        height="300"
                         style="border: 1px solid gray"
                     ></video>
                 </div>
@@ -56,6 +53,15 @@
 
                 <label>Result:</label>
                 <pre><code id="result"></code></pre>
+
+                <p>
+                    See the
+                    <a
+                        href="https://github.com/zxing-js/library/tree/master/docs/examples/multi-camera/"
+                        >source code</a
+                    >
+                    for this example.
+                </p>
             </section>
         </main>
 
@@ -92,31 +98,45 @@
                             );
                             sourceSelectPanel.style.display = 'block';
                         }
-
-                        codeReader.decodeFromVideoDevice(
-                            selectedDeviceId,
-                            'video',
-                            (result, err) => {
-                                if (result) {
-                                    console.log(result);
-                                    document.getElementById(
-                                        'result'
-                                    ).textContent = result.text;
-                                }
-                                if (
-                                    err &&
-                                    !(err instanceof ZXing.NotFoundException)
-                                ) {
-                                    console.error(err);
-                                    document.getElementById(
-                                        'result'
-                                    ).textContent = err;
-                                }
-                            }
-                        );
-                        console.log(
-                            `Started continous decode from camera with id ${selectedDeviceId}`
-                        );
+                        document
+                            .getElementById('startButton')
+                            .addEventListener('click', () => {
+                                codeReader.decodeFromVideoDevice(
+                                    selectedDeviceId,
+                                    'video',
+                                    (result, err) => {
+                                        if (result) {
+                                            console.log(result);
+                                            document.getElementById(
+                                                'result'
+                                            ).textContent = result.text;
+                                        }
+                                        if (
+                                            err &&
+                                            !(
+                                                err instanceof
+                                                ZXing.NotFoundException
+                                            )
+                                        ) {
+                                            console.error(err);
+                                            document.getElementById(
+                                                'result'
+                                            ).textContent = err;
+                                        }
+                                    }
+                                );
+                                console.log(
+                                    `Started continous decode from camera with id ${selectedDeviceId}`
+                                );
+                            });
+                        document
+                            .getElementById('resetButton')
+                            .addEventListener('click', () => {
+                                codeReader.reset();
+                                document.getElementById('result').textContent =
+                                    '';
+                                console.log('Reset.');
+                            });
                     })
                     .catch(err => {
                         console.error(err);
