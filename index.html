@@ -108,13 +108,8 @@
             if (list.length < 0) {
                 return;
             }
-            let str = '';
-            for (let i = 0; i < list.length; i++) {
-                str += ' / ';
-                str += list[i];
-            }
-            console.log(str);
-            qrcode.makeCode(str);
+            
+            qrcode.makeCode(list.join(','));
         };
 
         $('#text')
