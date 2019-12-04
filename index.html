@@ -40,8 +40,8 @@
 
                 <h1>scan-cart</h1>
                 <div>
-                    <a class="button" id="startButton">Start</a>
-                    <a class="button" id="resetButton">Reset</a>
+                    <a class="button" id="startButton">시작</a>
+                    <a class="button" id="resetButton">초기화</a>
                 </div>
 
                 <div>
@@ -53,10 +53,10 @@
                     <select id="sourceSelect" style="max-width:400px"> </select>
                 </div>
 
-                <label>Result:</label>
+                <!-- <label>Result:</label>
                 <pre><code id="result"></code></pre>
-                <button type="button" id="valueSave">저장</button>
-                <button type="button" id="createCode">QR코드 생성</button>
+                <button type="button" id="saveBtn">저장</button> -->
+                <button type="button" id="createBtn">QR코드 생성</button>
 
                 <div>
                     <ul id="scanedList"></ul>
@@ -73,24 +73,35 @@
         let resultArr = [];
 
         // 저장 클릭시
-        document.getElementById('valueSave').addEventListener('click', () => {
-            const codeValue = document.getElementById('result').innerText;
-            const html = `
-                <li>
-                <h5>scan value : ${codeValue}</h5>
-                </li>
-            `;
+        // document.getElementById('saveBtn').addEventListener('click', () => {
+        //     const codeValue = document.getElementById('result').innerText;
+        //     const html = `
+        //         <li>
+        //         <h5>scan value : ${codeValue}</h5>
+        //         </li>
+        //     `;
 
-            codeArr.push(codeValue);
+        //     codeArr.push(codeValue);
+        //     appendHtml(document.getElementById('scanedList'), html);
+        // });
+
+        scanCodeSave = value => {
+            const html = `
+                 <li>
+                 <h5>scan value : ${value}</h5>
+                 </li>
+             `;
+
+            codeArr.push(value);
             appendHtml(document.getElementById('scanedList'), html);
-        });
+        };
 
         // QR코드 생성 클릭시
-        document.getElementById('createCode').addEventListener('click', () => {
+        document.getElementById('createBtn').addEventListener('click', () => {
             const resultView = document.getElementById('resultView');
 
             if (codeArr.length < 1) {
-                alert('생성할 데이터가 없습니다.');
+                // alert('생성할 데이터가 없습니다.');
                 return false;
             }
 
@@ -115,15 +126,19 @@
             }
 
             // 결과 페이지 생성
+            const closeBtn = '<button type="button" id="closeBtn">닫기</button>';
+            appendHtml(document.getElementById('resultView'), closeBtn);
+            document.getElementById('closeBtn').onclick = closeResultView;
+
             for (let i = 0; i < resultArr.length; i++) {
                 const resultCode = resultArr[i].join(';');
                 const html = `
-                    <div>
-                        <span>${i + 1}번 그룹 => </span>
-                        <span>QR코드 값 : ${resultCode}</span>
-                        <div id="qrcode${i + 1}" style="width:100px; height:100px; margin-top:15px;"></div><br>
-                    </div>
-                `;
+                     <div>
+                         <span>${i + 1}번 그룹 => </span>
+                         <span>QR코드 값 : ${resultCode}</span>
+                         <div id="qrcode${i + 1}" style="width:100px; height:100px; margin-top:15px;"></div><br>
+                     </div>
+                 `;
 
                 appendHtml(document.getElementById('resultView'), html);
 
@@ -150,8 +165,11 @@
 
         // 결과 페이지 보여주기
         showResultView = () => {
+            document.getElementById('resetButton').click();
+
             const width = document.getElementById('demo-content').offsetWidth;
-            const height = document.getElementById('demo-content').offsetHeight;
+            const height = document.getElementsByTagName('body')[0].offsetHeight;
+
             resultView.style.width = width + 'px';
             resultView.style.height = height + 'px';
             resultView.style.backgroundColor = '#FAFAFA';
@@ -184,7 +202,10 @@
                         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                             if (result) {
                                 console.log(result);
-                                document.getElementById('result').textContent = result.text;
+                                if (confirm('저장 하시겠습니까?')) {
+                                    scanCodeSave(result);
+                                }
+                                //document.getElementById('result').textContent = result.text;
                             }
                             if (err && !(err instanceof ZXing.NotFoundException)) {
                                 console.error(err);
@@ -195,7 +216,7 @@
                     });
                     document.getElementById('resetButton').addEventListener('click', () => {
                         codeReader.reset();
-                        document.getElementById('result').textContent = '';
+                        // document.getElementById('result').textContent = '';
                         console.log('Reset.');
                     });
                 })
@@ -203,5 +224,14 @@
                     console.error(err);
                 });
         });
+
+        closeResultView = () => {
+            let myNode = document.getElementById('resultView');
+            while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild);
+            }
+
+            resultView.style.zIndex = -1;
+        };
     </script>
 </html>
