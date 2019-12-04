@@ -50,13 +50,10 @@
                 </div>
 
                 <div id="sourceSelectPanel" style="display:none">
-                    <label for="sourceSelect">Change video source:</label>
+                    <label for="sourceSelect">카메라 전환 : </label>
                     <select id="sourceSelect" style="max-width:400px"> </select>
                 </div>
 
-                <!-- <label>Result:</label>
-                <pre><code id="result"></code></pre>
-                <button type="button" id="saveBtn">저장</button> -->
                 <button type="button" id="createBtn">QR코드 생성</button>
 
                 <div>
@@ -73,27 +70,14 @@
         let codeArr = [];
         let resultArr = [];
 
-        // 저장 클릭시
-        // document.getElementById('saveBtn').addEventListener('click', () => {
-        //     const codeValue = document.getElementById('result').innerText;
-        //     const html = `
-        //         <li>
-        //         <h5>scan value : ${codeValue}</h5>
-        //         </li>
-        //     `;
-
-        //     codeArr.push(codeValue);
-        //     appendHtml(document.getElementById('scanedList'), html);
-        // });
-
-        scanCodeSave = value => {
+        scanCodeSave = result => {
             const html = `
                  <li>
-                 <h5>scan value : ${value}</h5>
+                 <h5>scan value : ${result.text}</h5>
                  </li>
              `;
 
-            codeArr.push(value);
+            codeArr.push(result.text);
             appendHtml(document.getElementById('scanedList'), html);
         };
 
@@ -207,7 +191,7 @@
                         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                             if (result) {
                                 console.log(result);
-                                if (confirm(result + '을 저장 하시겠습니까?')) {
+                                if (confirm(result.text + '을 저장 하시겠습니까?')) {
                                     scanCodeSave(result);
                                 }
                                 //document.getElementById('result').textContent = result.text;
