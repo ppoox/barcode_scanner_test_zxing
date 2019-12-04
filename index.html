@@ -69,7 +69,7 @@
     <script type="text/javascript" src="./qrcode.js"></script>
     <script type="text/javascript">
         const maxGroupNum = 4;
-        let codeArr = [];
+        let codeArr = ['2^20001^1^100', '3^30003^1^100'];
         let resultArr = [];
 
         // 저장 클릭시
@@ -108,16 +108,17 @@
             // 그룹 번호별 분류
             for (let i = 1; i < maxGroupNum + 1; i++) {
                 let secondArr = [];
+
                 for (let j = 0; j < codeArr.length; j++) {
                     const code = codeArr[j];
 
                     if (code.length > 0) {
                         if (code.indexOf(i) === 0) {
                             secondArr.push(code);
-                            resultArr[i - 1] = secondArr;
                         }
                     }
                 }
+                resultArr[i - 1] = secondArr;
             }
 
             if (resultArr.length < 1) {
@@ -131,8 +132,9 @@
             document.getElementById('closeBtn').onclick = closeResultView;
 
             for (let i = 0; i < resultArr.length; i++) {
-                const resultCode = resultArr[i].join(';');
-                const html = `
+                if (resultArr[i].length > 0) {
+                    const resultCode = resultArr[i].join(';');
+                    const html = `
                      <div>
                          <span>${i + 1}번 그룹 => </span>
                          <span>QR코드 값 : ${resultCode}</span>
@@ -140,15 +142,16 @@
                      </div>
                  `;
 
-                appendHtml(document.getElementById('resultView'), html);
+                    appendHtml(document.getElementById('resultView'), html);
 
-                let qrcodeDomId = 'qrcode' + (i + 1);
-                let qrcode = new QRCode(document.getElementById(qrcodeDomId), {
-                    width: 100,
-                    height: 100
-                });
+                    let qrcodeDomId = 'qrcode' + (i + 1);
+                    let qrcode = new QRCode(document.getElementById(qrcodeDomId), {
+                        width: 100,
+                        height: 100
+                    });
 
-                qrcode.makeCode(resultCode);
+                    qrcode.makeCode(resultCode);
+                }
             }
 
             showResultView();
