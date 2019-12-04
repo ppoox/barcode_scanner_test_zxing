@@ -28,6 +28,7 @@
                 list-style: none;
             }
             #resultView {
+                margin: 0;
                 position: fixed;
                 z-index: -1;
             }
@@ -69,7 +70,7 @@
     <script type="text/javascript" src="./qrcode.js"></script>
     <script type="text/javascript">
         const maxGroupNum = 4;
-        let codeArr = ['2^20001^1^100', '3^30003^1^100'];
+        let codeArr = [];
         let resultArr = [];
 
         // 저장 클릭시
