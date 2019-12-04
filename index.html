@@ -202,7 +202,7 @@
                         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                             if (result) {
                                 console.log(result);
-                                if (confirm('저장 하시겠습니까?')) {
+                                if (confirm(result + '을 저장 하시겠습니까?')) {
                                     scanCodeSave(result);
                                 }
                                 //document.getElementById('result').textContent = result.text;
