@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>scan-cart</title>
+        <link
+            rel="preload"
+            as="style"
+            onload="this.rel='stylesheet';this.onload=null"
+            href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
+        />
+        <link
+            rel="preload"
+            as="style"
+            onload="this.rel='stylesheet';this.onload=null"
+            href="https://unpkg.com/normalize.css@8.0.0/normalize.css"
+        />
+        <link
+            rel="preload"
+            as="style"
+            onload="this.rel='stylesheet';this.onload=null"
+            href="https://unpkg.com/milligram@1.3.0/dist/milligram.min.css"
+        />
+        <style>
+            #scanedList > li {
+                list-style: none;
+            }
+            #resultView {
+                position: fixed;
+                z-index: -1;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="wrapper" style="padding-top:2em">
+            <section class="container" id="demo-content">
+                <div id="resultView"></div>
+
+                <h1>scan-cart</h1>
+                <div>
+                    <a class="button" id="startButton">Start</a>
+                    <a class="button" id="resetButton">Reset</a>
+                </div>
+
+                <div>
+                    <video id="video" width="400" height="300" style="border: 1px solid gray"></video>
+                </div>
+
+                <div id="sourceSelectPanel" style="display:none">
+                    <label for="sourceSelect">Change video source:</label>
+                    <select id="sourceSelect" style="max-width:400px"> </select>
+                </div>
+
+                <label>Result:</label>
+                <pre><code id="result"></code></pre>
+                <button type="button" id="valueSave">저장</button>
+                <button type="button" id="createCode">QR코드 생성</button>
+
+                <div>
+                    <ul id="scanedList"></ul>
+                </div>
+            </section>
+        </main>
+    </body>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+    <script type="text/javascript" src="./jquery.min.js"></script>
+    <script type="text/javascript" src="./qrcode.js"></script>
+    <script type="text/javascript">
+        const maxGroupNum = 4;
+        let codeArr = [];
+        let resultArr = [];
+
+        // 저장 클릭시
+        document.getElementById('valueSave').addEventListener('click', () => {
+            const codeValue = document.getElementById('result').innerText;
+            const html = `
+                <li>
+                <h5>scan value : ${codeValue}</h5>
+                </li>
+            `;
+
+            codeArr.push(codeValue);
+            appendHtml(document.getElementById('scanedList'), html);
+        });
+
+        // QR코드 생성 클릭시
+        document.getElementById('createCode').addEventListener('click', () => {
+            const resultView = document.getElementById('resultView');
+
+            if (codeArr.length < 1) {
+                alert('생성할 데이터가 없습니다.');
+                return false;
+            }
+
+            // 그룹 번호별 분류
+            for (let i = 1; i < maxGroupNum + 1; i++) {
+                let secondArr = [];
+                for (let j = 0; j < codeArr.length; j++) {
+                    const code = codeArr[j];
+
+                    if (code.length > 0) {
+                        if (code.indexOf(i) === 0) {
+                            secondArr.push(code);
+                        }
+                    }
+                    resultArr[i - 1] = secondArr;
+                }
+            }
+
+            if (resultArr.length < 1) {
+                console.log('그룹별 분류 실패');
+                return false;
+            }
+
+            // 결과 페이지 생성
+            for (let i = 0; i < resultArr.length; i++) {
+                const resultCode = resultArr[i].join(';');
+                const html = `
+                    <div>
+                        <span>${i + 1}번 그룹 => </span>
+                        <span>QR코드 값 : ${resultCode}</span>
+                        <div id="qrcode${i + 1}" style="width:100px; height:100px; margin-top:15px;"></div><br>
+                    </div>
+                `;
+
+                appendHtml(document.getElementById('resultView'), html);
+
+                let qrcodeDomId = 'qrcode' + (i + 1);
+                let qrcode = new QRCode(document.getElementById(qrcodeDomId), {
+                    width: 100,
+                    height: 100
+                });
+
+                qrcode.makeCode(resultCode);
+            }
+
+            showResultView();
+        });
+
+        // Ele 동적 추가
+        appendHtml = (el, str) => {
+            let div = document.createElement('div');
+            div.innerHTML = str;
+            while (div.children.length > 0) {
+                el.appendChild(div.children[0]);
+            }
+        };
+
+        // 결과 페이지 보여주기
+        showResultView = () => {
+            const width = document.getElementById('demo-content').offsetWidth;
+            const height = document.getElementById('demo-content').offsetHeight;
+            resultView.style.width = width + 'px';
+            resultView.style.height = height + 'px';
+            resultView.style.backgroundColor = '#FAFAFA';
+            resultView.style.zIndex = 100;
+        };
+
+        // BAR/QR 코드 스캐너 불러오기
+        window.addEventListener('load', function() {
+            let selectedDeviceId;
+            const codeReader = new ZXing.BrowserMultiFormatReader();
+            codeReader
+                .getVideoInputDevices()
+                .then(videoInputDevices => {
+                    const sourceSelect = document.getElementById('sourceSelect');
+                    selectedDeviceId = videoInputDevices[0].deviceId;
+                    if (videoInputDevices.length >= 1) {
+                        videoInputDevices.forEach(element => {
+                            const sourceOption = document.createElement('option');
+                            sourceOption.text = element.label;
+                            sourceOption.value = element.deviceId;
+                            sourceSelect.appendChild(sourceOption);
+                        });
+                        sourceSelect.onchange = () => {
+                            selectedDeviceId = sourceSelect.value;
+                        };
+                        const sourceSelectPanel = document.getElementById('sourceSelectPanel');
+                        sourceSelectPanel.style.display = 'block';
+                    }
+                    document.getElementById('startButton').addEventListener('click', () => {
+                        codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+                            if (result) {
+                                console.log(result);
+                                document.getElementById('result').textContent = result.text;
+                            }
+                            if (err && !(err instanceof ZXing.NotFoundException)) {
+                                console.error(err);
+                                document.getElementById('result').textContent = err;
+                            }
+                        });
+                        console.log(`Started continous decode from camera with id ${selectedDeviceId}`);
+                    });
+                    document.getElementById('resetButton').addEventListener('click', () => {
+                        codeReader.reset();
+                        document.getElementById('result').textContent = '';
+                        console.log('Reset.');
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        });
+    </script>
+</html>
