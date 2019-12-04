@@ -190,11 +190,9 @@
                     document.getElementById('startButton').addEventListener('click', () => {
                         codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
                             if (result) {
-                                console.log(result);
                                 if (confirm(result.text + '을 저장 하시겠습니까?')) {
                                     scanCodeSave(result);
                                 }
-                                //document.getElementById('result').textContent = result.text;
                             }
                             if (err && !(err instanceof ZXing.NotFoundException)) {
                                 console.error(err);
@@ -205,8 +203,8 @@
                     });
                     document.getElementById('resetButton').addEventListener('click', () => {
                         codeReader.reset();
-                        // document.getElementById('result').textContent = '';
-                        console.log('Reset.');
+                        codeArr = [];
+                        emptyElement(document.getElementById('scanedList'));
                     });
                 })
                 .catch(err => {
@@ -215,13 +213,18 @@
         });
 
         closeResultView = () => {
-            let myNode = document.getElementById('resultView');
-            while (myNode.firstChild) {
-                myNode.removeChild(myNode.firstChild);
-            }
+            let resultView = document.getElementById('resultView');
+
+            emptyElement(resultView);
 
             resultView.style.zIndex = -1;
             resultView.style.touchAction = 'auto';
+        };
+
+        emptyElement = el => {
+            while (el.firstChild) {
+                el.removeChild(el.firstChild);
+            }
         };
     </script>
 </html>
