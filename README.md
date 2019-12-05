@@ -1,3 +1,3 @@
-#### barcode/qrcode_scanner_test_zxing
+#### BAR/QR code scanner with zxing, qrcodejs
 
 *test url* = https://ppoox.github.io/scanner
